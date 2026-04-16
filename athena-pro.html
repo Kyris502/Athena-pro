@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width,initial-scale=1.0">
+<meta name="viewport" content="width=device-width,initial-scale=1.0,maximum-scale=1.0,user-scalable=no,viewport-fit=cover">
 <title>ATHENA PRO — Kyriakos PK Method</title>
 <script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@4/dist/email.min.js"></script>
 <style>
@@ -21,7 +21,7 @@
   --M:'JetBrains Mono',monospace;--F:'Inter',sans-serif;
   --r:8px;--rs:5px;
 }
-html,body{height:100%;overflow:hidden;background:var(--bg);color:var(--t1);font-family:var(--F)}
+html,body{height:100%;height:100dvh;overflow:hidden;background:var(--bg);color:var(--t1);font-family:var(--F);-webkit-text-size-adjust:100%}
 ::-webkit-scrollbar{width:3px}::-webkit-scrollbar-track{background:transparent}::-webkit-scrollbar-thumb{background:var(--bg4);border-radius:2px}
 
 /* ── TOP BAR ── */
@@ -290,12 +290,155 @@ html,body{height:100%;overflow:hidden;background:var(--bg);color:var(--t1);font-
 .hs-lbl{font-size:9px;font-weight:800;letter-spacing:1px;text-transform:uppercase}
 .hs-val{font-family:'JetBrains Mono',monospace;font-size:15px;font-weight:900}
 
+
+/* ══════════════════════════════════
+   MOBILE RESPONSIVE — iPhone 14
+   ══════════════════════════════════ */
+@media (max-width: 768px){
+  /* Safe area for iPhone notch */
+  body{ padding-top: env(safe-area-inset-top); }
+
+  /* TOP BAR — compact */
+  #bar{ padding: 0 8px; height:44px; gap:4px; overflow-x:auto; flex-wrap:nowrap; -webkit-overflow-scrolling:touch; flex-shrink:0; }
+  #bar::-webkit-scrollbar{ display:none }
+  .logo-pk{ display:none }
+  .logo-main{ font-size:13px; letter-spacing:1px }
+  .vdiv{ display:none }
+  #sym-btn{ min-width:130px; padding:5px 8px; }
+  .sym-n{ font-size:11px }
+  .sym-p{ font-size:10px }
+  .sym-c{ font-size:9px }
+  .mode-btn{ padding:5px 8px; font-size:10px }
+  #MODE_TXT_SPAN{ display:none }
+  .tf-tab{ padding:3px 7px; font-size:10px }
+  .icon-btn{ width:28px; height:28px; font-size:12px }
+  /* Hide nav tabs — replaced by bottom tab bar */
+  .nav-tabs{ display:none !important }
+  .live-dot{ width:6px; height:6px }
+  .sig-badge{ font-size:9px; padding:3px 8px }
+
+  /* WORKSPACE */
+  #workspace{ flex-direction:column }
+
+  /* CHART PAGE — full screen tabs */
+  #page-chart{ flex-direction:column; position:relative }
+
+  /* Chart takes full screen */
+  #chart-area{
+    flex:1; min-height:0;
+    border-right:none;
+    border-bottom:none;
+  }
+  #info-bar{
+    font-size:9px; padding:0 8px; height:24px;
+    gap:4px; overflow-x:auto; flex-shrink:0;
+  }
+  #info-bar::-webkit-scrollbar{ display:none }
+  .iv{ font-size:9px }
+  .il{ font-size:8px }
+
+  /* Right panel — hidden by default, shown when panel tab active */
+  #rp{
+    width:100%;
+    position:absolute;
+    top:0; left:0; right:0; bottom:0;
+    z-index:100;
+    display:none;
+    border-left:none;
+    overflow-y:auto;
+    background:var(--bg1);
+  }
+  #rp.mob-visible{ display:flex; flex-direction:column }
+
+  /* Bottom tab bar for mobile */
+  #mob-tabs{
+    display:flex !important;
+    height:56px;
+    background:var(--bg1);
+    border-top:1px solid var(--brd);
+    flex-shrink:0;
+  }
+
+  /* Checklist header */
+  .cl-hdr{ padding:8px 12px }
+  .cl-h-pct{ font-size:22px }
+  .cl-item{ padding:6px 12px }
+  .cl-name{ font-size:11px }
+
+  /* Signal card */
+  .sig-head{ font-size:15px }
+
+  /* Trade levels */
+  .lvl-row{ padding:5px 8px }
+  .lv{ font-size:12px }
+
+  /* Lots inputs */
+  .lc-inputs{ grid-template-columns:1fr 1fr }
+  .lc-num{ font-size:24px }
+
+  /* AOI items */
+  .aoi-item{ padding:6px 8px }
+  .aoi-vals{ font-size:10px }
+
+  /* H&S panel */
+  #HS_SEC > div:last-child{ grid-template-columns:1fr 1fr }
+
+  /* Symbol dropdown full screen */
+  #sym-drop{ width:100vw; max-height:80vh; top:46px; left:0; right:0 }
+
+  /* Bottom bar */
+  #btm{ padding:0 10px; height:28px; font-size:9px }
+
+  /* Confluence page */
+  .cfp{ padding-bottom:20px }
+  .cf-hdr{ padding:10px 12px }
+  .cf-hdr h2{ font-size:16px }
+  .cfs-val{ font-size:18px }
+  .cf-tfs{ grid-template-columns:repeat(3,1fr); gap:5px }
+  .cf-tfp{ font-size:16px }
+  .cf-bottom{ grid-template-columns:1fr }
+  .cf-card{ border-right:none; border-bottom:1px solid var(--brd) }
+  .cf-donut-sec{ padding:16px 12px; gap:16px }
+  .cf-donut{ width:140px; height:140px }
+  .cf-donut svg{ width:140px; height:140px }
+  .cf-dpct{ font-size:32px }
+
+  /* Order Flow page */
+  #page-orderflow > div{ flex-direction:column }
+  #page-orderflow canvas{ min-height:340px }
+  #of-right-panel{ width:100%; max-height:220px; border-left:none; border-top:1px solid var(--brd); flex-direction:row; overflow-x:auto; display:flex; gap:0 }
+  #of-vp-section{ min-width:180px; border-right:1px solid var(--brd); padding:8px }
+  #of-stats-section{ min-width:180px; padding:8px }
+
+  /* Modal full screen on mobile */
+  .modal{ width:100vw; max-width:100vw; border-radius:0; height:100vh; max-height:100vh; overflow-y:auto; padding:16px }
+  .modal-grid{ grid-template-columns:1fr }
+  .mg-sec{ border-right:none; padding-right:0; border-bottom:1px solid var(--brd); padding-bottom:14px; margin-bottom:14px }
+
+  /* Pills smaller */
+  .pill{ padding:2px 5px; font-size:9px }
+  .pills{ gap:3px }
+
+  /* Pattern box */
+  .pat-box{ padding:6px 8px }
+
+  /* HS rows grid */
+  #HS_SEC > div:nth-child(2){ padding:0 8px 8px 8px }
+}
+
+/* iPhone 14 specific (390px width) */
+@media (max-width: 430px){
+  .cf-tfs{ grid-template-columns:repeat(2,1fr) }
+  .lc-inputs{ grid-template-columns:1fr 1fr }
+  .rr-box{ flex-direction:column; gap:5px }
+}
+
 /* Toast */
 #toast{position:fixed;bottom:22px;right:22px;z-index:99999;padding:11px 18px;border-radius:var(--r);font-family:var(--F);font-size:13px;font-weight:800;box-shadow:0 8px 28px rgba(0,0,0,.7);transition:opacity .4s;pointer-events:none;opacity:0}
 </style>
 </head>
 <body>
-<div style="display:flex;flex-direction:column;height:100%;overflow:hidden">
+<div style="display:flex;flex-direction:column;height:100%;height:100dvh;overflow:hidden">
 
 <!-- ═══ TOP BAR ═══ -->
 <div id="bar">
@@ -671,13 +814,17 @@ html,body{height:100%;overflow:hidden;background:var(--bg);color:var(--t1);font-
         </div>
       </div>
       <!-- Right stats panel -->
-      <div style="width:200px;background:var(--bg1);border-left:1px solid var(--brd);overflow-y:auto;flex-shrink:0;padding:10px">
-        <div style="font-size:9px;font-weight:800;letter-spacing:2px;color:var(--t3);text-transform:uppercase;margin-bottom:8px">Volume Profile</div>
-        <div id="of-vp-bars" style="display:flex;flex-direction:column;gap:2px;margin-bottom:14px"></div>
-        <div style="font-size:9px;font-weight:800;letter-spacing:2px;color:var(--t3);text-transform:uppercase;margin-bottom:8px">Delta Stats</div>
-        <div id="of-stats" style="display:flex;flex-direction:column;gap:5px"></div>
-        <div style="font-size:9px;font-weight:800;letter-spacing:2px;color:var(--t3);text-transform:uppercase;margin:12px 0 8px">Imbalances</div>
-        <div id="of-imbalances" style="font-size:10px;color:var(--t2)">Scanning...</div>
+      <div id="of-right-panel" style="width:200px;background:var(--bg1);border-left:1px solid var(--brd);overflow-y:auto;flex-shrink:0">
+        <div id="of-vp-section" style="padding:10px">
+          <div style="font-size:9px;font-weight:800;letter-spacing:2px;color:var(--t3);text-transform:uppercase;margin-bottom:8px">Volume Profile</div>
+          <div id="of-vp-bars" style="display:flex;flex-direction:column;gap:2px;margin-bottom:14px"></div>
+        </div>
+        <div id="of-stats-section" style="padding:10px;border-top:1px solid var(--brd)">
+          <div style="font-size:9px;font-weight:800;letter-spacing:2px;color:var(--t3);text-transform:uppercase;margin-bottom:8px">Delta Stats</div>
+          <div id="of-stats" style="display:flex;flex-direction:column;gap:5px"></div>
+          <div style="font-size:9px;font-weight:800;letter-spacing:2px;color:var(--t3);text-transform:uppercase;margin:12px 0 8px">Imbalances</div>
+          <div id="of-imbalances" style="font-size:10px;color:var(--t2)">Scanning...</div>
+        </div>
       </div>
     </div>
   </div>
@@ -693,6 +840,25 @@ html,body{height:100%;overflow:hidden;background:var(--bg);color:var(--t1);font-
   <div style="margin-left:auto;font-family:var(--M);font-size:10px;color:var(--t3)" id="BTM_PRICE">—</div>
 </div>
 
+  <!-- MOBILE BOTTOM TAB BAR -->
+  <div id="mob-tabs" style="display:none;height:56px;background:var(--bg1);border-top:1px solid var(--brd);flex-shrink:0;padding-bottom:env(safe-area-inset-bottom)">
+    <button onclick="mobTab('chart')" id="mt-chart" style="flex:1;background:none;border:none;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;cursor:pointer;color:var(--B)">
+      <span style="font-size:18px">📊</span>
+      <span style="font-size:9px;font-weight:700;color:var(--B)">Chart</span>
+    </button>
+    <button onclick="mobTab('panel')" id="mt-panel" style="flex:1;background:none;border:none;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;cursor:pointer;color:var(--t3)">
+      <span style="font-size:18px">📋</span>
+      <span style="font-size:9px;font-weight:700;color:var(--t3)">Signal</span>
+    </button>
+    <button onclick="mobTab('orderflow')" id="mt-of" style="flex:1;background:none;border:none;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;cursor:pointer;color:var(--t3)">
+      <span style="font-size:18px">⚡</span>
+      <span style="font-size:9px;font-weight:700;color:var(--t3)">Flow</span>
+    </button>
+    <button onclick="mobTab('confluence')" id="mt-conf" style="flex:1;background:none;border:none;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;cursor:pointer;color:var(--t3)">
+      <span style="font-size:18px">🎯</span>
+      <span style="font-size:9px;font-weight:700;color:var(--t3)">Confluence</span>
+    </button>
+  </div>
 </div><!-- /app -->
 
 <!-- SETTINGS MODAL -->
@@ -2211,6 +2377,60 @@ function initOrderFlow(){
 }
 
 // ═══════════════════════════════════════════════════
+
+
+// ── MOBILE TAB NAVIGATION ─────────────────────────
+function isMobile(){ return window.innerWidth<=768; }
+
+function mobTab(tab){
+  if(!isMobile()) return;
+  const rp=$('rp');
+  const chartPage=$('page-chart');
+  const ofPage=$('page-orderflow');
+  const cfPage=$('page-confluence');
+
+  // Hide all pages first
+  [ofPage,cfPage].forEach(p=>{ if(p) p.classList.remove('active'); });
+  chartPage.classList.add('active');
+
+  // Reset all tab colors
+  ['chart','panel','of','conf'].forEach(t=>{
+    const btn=$('mt-'+t);
+    if(!btn) return;
+    btn.style.color='var(--t3)';
+    btn.querySelector('span:last-child').style.color='var(--t3)';
+  });
+
+  const activeBtn=$('mt-'+tab.replace('orderflow','of').replace('confluence','conf'));
+  if(activeBtn){
+    activeBtn.style.color='var(--B)';
+    activeBtn.querySelector('span:last-child').style.color='var(--B)';
+  }
+
+  if(tab==='chart'){
+    if(rp) rp.classList.remove('mob-visible');
+  } else if(tab==='panel'){
+    if(rp) rp.classList.add('mob-visible');
+  } else if(tab==='orderflow'){
+    if(rp) rp.classList.remove('mob-visible');
+    chartPage.classList.remove('active');
+    if(ofPage){ ofPage.classList.add('active'); initOrderFlow(); }
+  } else if(tab==='confluence'){
+    if(rp) rp.classList.remove('mob-visible');
+    chartPage.classList.remove('active');
+    if(cfPage){ cfPage.classList.add('active'); updateCFPage(SIG.score); updateHSPanel(); }
+  }
+}
+
+// On mobile, show tab bar and start on chart tab
+function initMobile(){
+  if(!isMobile()) return;
+  const mt=$('mob-tabs');
+  if(mt) mt.style.display='flex';
+  mobTab('chart');
+}
+
+// ── MOBILE TAB NAVIGATION ─────────────────────────
 
 // INIT
 async function init(){
