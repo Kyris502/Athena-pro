@@ -913,7 +913,7 @@ const SYMS = {
   ETHUSDT:{n:'ETH/USDT',i:'Ξ', cat:'crypto',p:1598,    pip:1,     pv:1,   dig:0, lev:2,  up:true,  chg:'+0.85', tv:'BINANCE:ETHUSDT',   desc:'Ethereum / USDT'},
   EURUSD: {n:'EUR/USD', i:'💱',cat:'forex', p:1.13500, pip:.0001, pv:10,  dig:5, lev:30, up:true,  chg:'+0.62', tv:'FX:EURUSD',          desc:'Euro / US Dollar'},
   GBPUSD: {n:'GBP/USD', i:'💱',cat:'forex', p:1.32450, pip:.0001, pv:10,  dig:5, lev:30, up:true,  chg:'+0.38', tv:'FX:GBPUSD',          desc:'British Pound / USD'},
-  AUDUSD: {n:'AUD/USD', i:'💱',cat:'forex', p:0.63550, pip:.0001, pv:10,  dig:5, lev:30, up:true,  chg:'+0.72', tv:'FX:AUDUSD',          desc:'Australian Dollar'},
+  AUDUSD: {n:'AUD/USD', i:'💱',cat:'forex', p:0.62850, pip:.0001, pv:10,  dig:5, lev:30, up:true,  chg:'+0.72', tv:'FX:AUDUSD',          desc:'Australian Dollar'},
   USDJPY: {n:'USD/JPY', i:'💱',cat:'forex', p:142.50,  pip:.01,   pv:7.02,dig:3, lev:30, up:false, chg:'-0.45', tv:'FX:USDJPY',          desc:'US Dollar / JPY'},
   NAS100: {n:'NAS 100', i:'📊',cat:'index', p:19150,   pip:.1,    pv:1,   dig:1, lev:20, up:true,  chg:'+0.95', tv:'OANDA:NAS100USD',    desc:'NASDAQ 100'},
   US30:   {n:'US 30',   i:'📊',cat:'index', p:40200,   pip:1,     pv:1,   dig:0, lev:20, up:true,  chg:'+0.82', tv:'FOREXCOM:DJI',       desc:'Dow Jones'},
@@ -1895,28 +1895,46 @@ function goPage(id,btn){
 async function fetchLivePrice(code){
   try{
     const s=SYMS[code];
+
+    // ── CRYPTO: Binance public API ──
     if(s.cat==='crypto'){
-      // Binance public API - no key needed
       const pair=code.replace('USDT','')+'USDT';
-      const res=await fetch(`https://api.binance.com/api/v3/ticker/price?symbol=${pair}`,{signal:AbortSignal.timeout(4000)});
+      const res=await fetch(`https://api.binance.com/api/v3/ticker/price?symbol=${pair}`,{signal:AbortSignal.timeout(5000)});
       const data=await res.json();
-      if(data.price) return parseFloat(data.price);
+      if(data.price) return parseFloat(parseFloat(data.price).toFixed(s.dig));
     }
-    // For forex/metals/indices: try frankfurter (forex only) or fallback
+
+    // ── FOREX: Frankfurter API (free, no key) ──
     if(s.cat==='forex'){
-      const pairs={EURUSD:'EUR',GBPUSD:'GBP',AUDUSD:'AUD',USDJPY:'JPY'};
-      const base=pairs[code];
-      if(base){
-        const res=await fetch(`https://api.frankfurter.app/latest?from=${base}&to=USD`,{signal:AbortSignal.timeout(4000)});
+      // Map to correct currency pair
+      const fxMap={
+        EURUSD:{from:'EUR',to:'USD',inv:false},
+        GBPUSD:{from:'GBP',to:'USD',inv:false},
+        AUDUSD:{from:'AUD',to:'USD',inv:false},
+        USDJPY:{from:'USD',to:'JPY',inv:false},
+      };
+      const fx=fxMap[code];
+      if(fx){
+        const res=await fetch(`https://api.frankfurter.app/latest?from=${fx.from}&to=${fx.to}`,{signal:AbortSignal.timeout(5000)});
         const data=await res.json();
-        if(data.rates?.USD){
-          if(code==='USDJPY') return null; // JPY/USD inverted, skip
-          return parseFloat(data.rates.USD.toFixed(s.dig));
-        }
+        const rate=data.rates?.[fx.to];
+        if(rate) return parseFloat(parseFloat(rate).toFixed(s.dig));
       }
     }
-  }catch(e){}
-  return null; // fallback to hardcoded price
+
+    // ── METALS/INDICES: Try exchangerate.host (free) ──
+    if(s.cat==='metal'){
+      const metalMap={XAUUSD:'XAU',XAGUSD:'XAG'};
+      const metal=metalMap[code];
+      if(metal){
+        const res=await fetch(`https://api.exchangerate.host/latest?base=${metal}&symbols=USD`,{signal:AbortSignal.timeout(5000)});
+        const data=await res.json();
+        if(data.rates?.USD) return parseFloat((1/data.rates.USD).toFixed(s.dig));
+      }
+    }
+
+  }catch(e){ console.warn('[ATHENA] Live price fetch failed for',code,e.message); }
+  return null;
 }
 
 async function applySym(code){
@@ -1927,9 +1945,12 @@ async function applySym(code){
   const liveP=await fetchLivePrice(code);
   if(liveP&&liveP>0){
     SYMS[code].p=parseFloat(liveP.toFixed(s.dig));
-    console.log(`[ATHENA] Live price for ${code}: ${SYMS[code].p}`);
+    console.log(`[ATHENA] ✅ Live price for ${code}: ${SYMS[code].p}`);
+    // Update price display immediately
+    const sp=$('S_PRICE');
+    if(sp) sp.textContent=liveP.toFixed(s.dig);
   } else {
-    console.log(`[ATHENA] Using stored price for ${code}: ${s.p}`);
+    console.log(`[ATHENA] ⚠ Using stored price for ${code}: ${s.p}`);
   }
   $('S_ICO').textContent=s.i;$('S_NAME').textContent=s.n;
   $('S_PRICE').textContent=fmt(s.p,s.dig);$('S_PRICE').className='sym-p '+(s.up?'cg':'cr');
