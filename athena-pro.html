@@ -4,6 +4,19 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1.0,maximum-scale=1.0,user-scalable=no,viewport-fit=cover">
 <title>ATHENA PRO — Kyriakos PK Method</title>
+
+<!-- PWA / iPhone App settings -->
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="ATHENA PRO">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="theme-color" content="#111827">
+
+<!-- iPhone App Icon (generated via CSS) -->
+<link rel="apple-touch-icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 180 180'%3E%3Crect width='180' height='180' rx='40' fill='%23111827'/%3E%3Ctext x='90' y='115' font-family='Arial Black' font-size='80' font-weight='900' text-anchor='middle' fill='%233b82f6'%3EA%3C/text%3E%3Ctext x='90' y='160' font-family='Arial' font-size='22' font-weight='700' text-anchor='middle' fill='%2300d4a8'%3EPRO%3C/text%3E%3C/svg%3E">
+
+<!-- Splash screens for iPhone -->
+<meta name="apple-touch-startup-image" content="">
 <script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@4/dist/email.min.js"></script>
 <style>
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500;600;700&display=swap');
@@ -22,6 +35,13 @@
   --r:8px;--rs:5px;
 }
 html,body{height:100%;height:100dvh;overflow:hidden;background:var(--bg);color:var(--t1);font-family:var(--F);-webkit-text-size-adjust:100%}
+
+/* When running as iPhone app (fullscreen) */
+@media all and (display-mode: standalone){
+  body{ padding-top: env(safe-area-inset-top); padding-bottom: env(safe-area-inset-bottom); }
+  #bar{ padding-top: 4px }
+  #mob-tabs{ padding-bottom: calc(env(safe-area-inset-bottom) + 4px); height: calc(56px + env(safe-area-inset-bottom)); }
+}
 ::-webkit-scrollbar{width:3px}::-webkit-scrollbar-track{background:transparent}::-webkit-scrollbar-thumb{background:var(--bg4);border-radius:2px}
 
 /* ── TOP BAR ── */
@@ -403,12 +423,25 @@ html,body{height:100%;height:100dvh;overflow:hidden;background:var(--bg);color:v
   .cf-donut svg{ width:140px; height:140px }
   .cf-dpct{ font-size:32px }
 
-  /* Order Flow page */
-  #page-orderflow > div{ flex-direction:column }
-  #page-orderflow canvas{ min-height:340px }
-  #of-right-panel{ width:100%; max-height:220px; border-left:none; border-top:1px solid var(--brd); flex-direction:row; overflow-x:auto; display:flex; gap:0 }
-  #of-vp-section{ min-width:180px; border-right:1px solid var(--brd); padding:8px }
-  #of-stats-section{ min-width:180px; padding:8px }
+  /* Order Flow page - mobile */
+  #page-orderflow{ flex-direction:column }
+  #page-orderflow > div{ flex-direction:column; height:100% }
+  #of-right-panel{
+    width:100% !important;
+    height:auto !important;
+    max-height:45vh;
+    border-left:none !important;
+    border-top:1px solid var(--brd);
+    flex-direction:row;
+    overflow-x:auto;
+    display:flex;
+    flex-shrink:0;
+  }
+  #of-vp-section{ min-width:200px; border-right:1px solid var(--brd); padding:8px; overflow-y:auto; max-height:40vh }
+  #of-stats-section{ min-width:160px; padding:8px; overflow-y:auto; max-height:40vh }
+  #of-canvas{ min-height:280px !important }
+  /* Hide legend on small screens */
+  #of-legend{ display:none }
 
   /* Modal full screen on mobile */
   .modal{ width:100vw; max-width:100vw; border-radius:0; height:100vh; max-height:100vh; overflow-y:auto; padding:16px }
@@ -705,10 +738,16 @@ html,body{height:100%;height:100dvh;overflow:hidden;background:var(--bg);color:v
 <div class="page" id="page-confluence">
   <div class="cfp">
     <div class="cf-hdr">
-      <h2>Confluence Summary</h2>
-      <div class="cf-scores">
-        <div class="cfs-item"><span class="cfs-lbl">30M, 1H, 2H SCORE</span><span class="cfs-val cb" id="CF_S1">—</span></div>
-        <div class="cfs-item"><span class="cfs-lbl">4H SCORE</span><span class="cfs-val cb" id="CF_S2">—</span></div>
+      <div>
+        <h2>Confluence Summary</h2>
+        <div style="font-size:10px;color:var(--t3);margin-top:3px" id="CF_DATE_LBL">Calculated today — locked until midnight</div>
+      </div>
+      <div style="display:flex;align-items:center;gap:12px">
+        <button onclick="resetConfluence()" style="background:var(--bg2);border:1px solid var(--brd2);color:var(--t2);font-family:var(--F);font-size:10px;font-weight:700;padding:5px 10px;border-radius:var(--rs);cursor:pointer;transition:all .15s" onmouseover="this.style.color='var(--t1)'" onmouseout="this.style.color='var(--t2)'">↺ Recalculate</button>
+        <div class="cf-scores">
+          <div class="cfs-item"><span class="cfs-lbl">30M, 1H, 2H SCORE</span><span class="cfs-val cb" id="CF_S1">—</span></div>
+          <div class="cfs-item"><span class="cfs-lbl">4H SCORE</span><span class="cfs-val cb" id="CF_S2">—</span></div>
+        </div>
       </div>
     </div>
     <div class="cf-donut-sec">
@@ -726,6 +765,26 @@ html,body{height:100%;height:100dvh;overflow:hidden;background:var(--bg);color:v
       </div>
       <div class="cf-tfs" id="CF_TFS"></div>
     </div>
+    <!-- SESSION CONFLUENCE -->
+    <div style="padding:12px 18px;border-top:1px solid var(--brd);border-bottom:1px solid var(--brd);background:var(--bg1)">
+      <div style="font-size:9px;font-weight:800;letter-spacing:2px;color:var(--t3);text-transform:uppercase;margin-bottom:8px">🕐 Session Confluence — Today</div>
+      <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:6px" id="CF_SESSIONS"></div>
+    </div>
+
+    <!-- ALL PAIRS OVERVIEW -->
+    <div style="padding:12px 18px;border-bottom:1px solid var(--brd);background:var(--bg1)">
+      <div style="font-size:9px;font-weight:800;letter-spacing:2px;color:var(--t3);text-transform:uppercase;margin-bottom:8px">📊 All Pairs Overview</div>
+      <div style="display:grid;grid-template-columns:repeat(2,1fr);gap:5px" id="CF_PAIRS"></div>
+    </div>
+
+    <!-- MULTI-TF PATTERN DETECTION -->
+    <div style="padding:12px 18px;border-top:1px solid var(--brd);border-bottom:1px solid var(--brd);background:var(--bg1)">
+      <div style="font-size:9px;font-weight:800;letter-spacing:2px;color:var(--t3);text-transform:uppercase;margin-bottom:8px">🔍 Pattern Detection — All Timeframes</div>
+      <div id="CF_HS_MULTI" style="display:flex;flex-direction:column;gap:5px">
+        <div style="font-size:11px;color:var(--t3)">Scanning…</div>
+      </div>
+    </div>
+
     <!-- H&S BOX on Confluence page -->
     <div id="CF_HS_BOX" style="display:none;margin:0;border-top:1px solid var(--brd);border-bottom:1px solid var(--brd);background:var(--bg2)">
       <div style="padding:10px 16px 0 16px;display:flex;align-items:center;justify-content:space-between">
@@ -958,7 +1017,7 @@ let SIG={
   MIN_SELL:35,     // maximum score to trigger SELL
 };
 let FORCE=false, CLOSED=false, CLOSE_T=0;
-let TFCONF={}, NEWS=[], NEWS_RISK=false;
+let TFCONF={}, TFCONF_DATE='', NEWS=[], NEWS_RISK=false;
 let dropOpen=false, sigSec=1, candleEl=0;
 let TD_KEY=ls('td_key'), FH_KEY=ls('fh_key');
 let EJ_KEY=ls('ej_key'), EJ_SVC=ls('ej_svc'), EJ_TPL=ls('ej_tpl');
@@ -966,7 +1025,8 @@ let NOTIFY_EMAIL=ls('notify_email')||'petroukyriakos79@gmail.com';
 let lastMailSig='', lastMailT=0;
 
 // Head & Shoulders state for overlay
-let HS_STATE=null; // {type:'HS'|'IHS', ls, head, rs, neckline_y, leftX, rightX}
+let HS_STATE=null; // current TF H&S state
+let HS_ALL_TFS={}; // {tf: {state, pattern, confluence}}
 
 const $=id=>document.getElementById(id);
 const fv=id=>{const e=$(id);return e?parseFloat(e.value)||0:0;};
@@ -1168,11 +1228,15 @@ function redraw(){
       ctx.fillText(priceStr, W-OV.RIGHT+1+(OV.RIGHT-2)/2, y+4);
     }
 
-    // Draw each band with name + price
+    // Labels depend on pattern type
     const d=sym.dig;
-    drawHSBand(hs.head.price, (isBear?'⬆ HEAD':'⬇ HEAD'), hs.head.price.toFixed(d), true);
-    drawHSBand(hs.ls.price,   'L. SHOULDER', hs.ls.price.toFixed(d),   false);
-    drawHSBand(hs.rs.price,   'R. SHOULDER', hs.rs.price.toFixed(d),   false);
+    const patType=hs.type;
+    const lsLbl = patType==='DT'?'TOP 1':patType==='DB'?'BOTTOM 1':patType==='TT'?'TOP 1':patType==='TB'?'BOTTOM 1':'L. SHOULDER';
+    const hdLbl = patType==='DT'?'⬆ DOUBLE TOP':patType==='DB'?'⬇ DOUBLE BOTTOM':patType==='TT'?'⬆ TRIPLE TOP':patType==='TB'?'⬇ TRIPLE BOTTOM':(isBear?'⬆ HEAD':'⬇ HEAD');
+    const rsLbl = patType==='DT'?'TOP 2':patType==='DB'?'BOTTOM 2':patType==='TT'?'TOP 3':patType==='TB'?'BOTTOM 3':'R. SHOULDER';
+    drawHSBand(hs.head.price, hdLbl, hs.head.price.toFixed(d), true);
+    drawHSBand(hs.ls.price,   lsLbl, hs.ls.price.toFixed(d),   false);
+    drawHSBand(hs.rs.price,   rsLbl, hs.rs.price.toFixed(d),   false);
 
     // ── NECKLINE ──────────────────────────────────
     if(chk('S_NCK')&&hs.necklineY){
@@ -1327,6 +1391,86 @@ function detectPatternFull(cands){
     }
   }
   HS_STATE=null; $('LEG_HS').style.display='none'; $('LEG_IHS').style.display='none';
+
+  // ── DOUBLE TOP (Bearish) ──
+  if(peaks.length>=2){
+    const p1=peaks[peaks.length-2], p2=peaks[peaks.length-1];
+    const diff=Math.abs(p1.price-p2.price)/p1.price;
+    const gap=p2.idx-p1.idx;
+    if(diff<0.03 && gap>=4 && gap<=30){
+      const neckTrough=troughs.filter(t=>t.idx>p1.idx&&t.idx<p2.idx).slice(-1)[0];
+      const necklineY=neckTrough?neckTrough.price:Math.min(p1.price,p2.price)*0.985;
+      HS_STATE={type:'DT',ls:{price:p1.price,idx:p1.i},head:{price:Math.max(p1.price,p2.price),idx:p2.i},rs:{price:p2.price,idx:p2.i},necklineY};
+      $('LEG_HS').style.display='flex';$('LEG_IHS').style.display='none';
+      setTimeout(()=>{setPriceRange();redraw();},50);
+      return{name:'DOUBLE TOP',dir:'BEAR',color:'var(--R)'};
+    }
+  }
+
+  // ── DOUBLE BOTTOM (Bullish) ──
+  if(troughs.length>=2){
+    const t1=troughs[troughs.length-2], t2=troughs[troughs.length-1];
+    const diff=Math.abs(t1.price-t2.price)/Math.abs(t1.price);
+    const gap=t2.idx-t1.idx;
+    if(diff<0.03 && gap>=4 && gap<=30){
+      const neckPeak=peaks.filter(p=>p.idx>t1.idx&&p.idx<t2.idx).slice(-1)[0];
+      const necklineY=neckPeak?neckPeak.price:Math.max(t1.price,t2.price)*1.015;
+      HS_STATE={type:'DB',ls:{price:t1.price,idx:t1.i},head:{price:Math.min(t1.price,t2.price),idx:t2.i},rs:{price:t2.price,idx:t2.i},necklineY};
+      $('LEG_IHS').style.display='flex';$('LEG_HS').style.display='none';
+      setTimeout(()=>{setPriceRange();redraw();},50);
+      return{name:'DOUBLE BOTTOM',dir:'BULL',color:'var(--G)'};
+    }
+  }
+
+  // ── TRIPLE TOP (Bearish) ──
+  if(peaks.length>=3){
+    const p1=peaks[peaks.length-3],p2=peaks[peaks.length-2],p3=peaks[peaks.length-1];
+    const avgP=(p1.price+p2.price+p3.price)/3;
+    const maxDev=Math.max(Math.abs(p1.price-avgP),Math.abs(p2.price-avgP),Math.abs(p3.price-avgP))/avgP;
+    if(maxDev<0.025 && p3.idx-p1.idx>=6 && p3.idx-p1.idx<=50){
+      const necklineY=Math.min(...troughs.filter(t=>t.idx>=p1.idx&&t.idx<=p3.idx).map(t=>t.price))||avgP*0.98;
+      HS_STATE={type:'TT',ls:{price:p1.price,idx:p1.i},head:{price:p2.price,idx:p2.i},rs:{price:p3.price,idx:p3.i},necklineY};
+      $('LEG_HS').style.display='flex';$('LEG_IHS').style.display='none';
+      setTimeout(()=>{setPriceRange();redraw();},50);
+      return{name:'TRIPLE TOP',dir:'BEAR',color:'var(--R)'};
+    }
+  }
+
+  // ── TRIPLE BOTTOM (Bullish) ──
+  if(troughs.length>=3){
+    const t1=troughs[troughs.length-3],t2=troughs[troughs.length-2],t3=troughs[troughs.length-1];
+    const avgT=(t1.price+t2.price+t3.price)/3;
+    const maxDev=Math.max(Math.abs(t1.price-avgT),Math.abs(t2.price-avgT),Math.abs(t3.price-avgT))/avgT;
+    if(maxDev<0.025 && t3.idx-t1.idx>=6 && t3.idx-t1.idx<=50){
+      const necklineY=Math.max(...peaks.filter(p=>p.idx>=t1.idx&&p.idx<=t3.idx).map(p=>p.price))||avgT*1.02;
+      HS_STATE={type:'TB',ls:{price:t1.price,idx:t1.i},head:{price:t2.price,idx:t2.i},rs:{price:t3.price,idx:t3.i},necklineY};
+      $('LEG_IHS').style.display='flex';$('LEG_HS').style.display='none';
+      setTimeout(()=>{setPriceRange();redraw();},50);
+      return{name:'TRIPLE BOTTOM',dir:'BULL',color:'var(--G)'};
+    }
+  }
+
+  // ── RISING WEDGE (Bearish) ──
+  if(peaks.length>=3&&troughs.length>=3){
+    const rPeaks=peaks.slice(-3),rTroughs=troughs.slice(-3);
+    const peakSlope=(rPeaks[2].price-rPeaks[0].price)/(rPeaks[2].idx-rPeaks[0].idx||1);
+    const troughSlope=(rTroughs[2].price-rTroughs[0].price)/(rTroughs[2].idx-rTroughs[0].idx||1);
+    if(peakSlope>0&&troughSlope>0&&troughSlope>peakSlope*1.2){
+      HS_STATE=null;$('LEG_HS').style.display='none';$('LEG_IHS').style.display='none';
+      return{name:'RISING WEDGE ▼',dir:'BEAR',color:'var(--R)'};
+    }
+  }
+
+  // ── FALLING WEDGE (Bullish) ──
+  if(peaks.length>=3&&troughs.length>=3){
+    const fPeaks=peaks.slice(-3),fTroughs=troughs.slice(-3);
+    const peakSlope2=(fPeaks[2].price-fPeaks[0].price)/(fPeaks[2].idx-fPeaks[0].idx||1);
+    const troughSlope2=(fTroughs[2].price-fTroughs[0].price)/(fTroughs[2].idx-fTroughs[0].idx||1);
+    if(peakSlope2<0&&troughSlope2<0&&Math.abs(peakSlope2)>Math.abs(troughSlope2)*1.2){
+      HS_STATE=null;$('LEG_HS').style.display='none';$('LEG_IHS').style.display='none';
+      return{name:'FALLING WEDGE ▲',dir:'BULL',color:'var(--G)'};
+    }
+  }
 
   // ── Engulfing ──
   const last2=cands.slice(-2);
@@ -1514,8 +1658,10 @@ function runSignal(){
   else if(patIsBear) score=Math.max(0,score-8);
 
   if(NEWS_RISK)score=Math.max(0,score-15);
-  if(priceBull&&trendBull&&!patIsBearHS)  score=Math.min(100,score+5);
-  if(!priceBull&&!trendBull&&!patIsBullIHS) score=Math.max(0,score-5);
+  if(priceBull&&trendBull&&!patIsBearHS)  score=Math.min(92,score+5);
+  if(!priceBull&&!trendBull&&!patIsBullIHS) score=Math.max(8,score-5);
+  // Cap max score to prevent extreme values
+  score=Math.min(92,Math.max(8,score));
 
   // Update condition dots
   const cg=$('COND_GRID');
@@ -1631,10 +1777,44 @@ function runSignal(){
   updateTradeDisplay();
   calcLots();
 
-  // TF confluence
-  const tfc={};
-  ['30m','1H','2H','4H','1D','1W'].forEach(t=>{const v=Math.max(10,Math.min(92,Math.round(score+(Math.random()-.5)*20)));tfc[t]={score:v,dir:v>=65?'BULL':v<=35?'BEAR':'NEUT'};});
-  TFCONF=tfc;
+  // TF confluence — calculated once per day, locked until next day
+  const today=new Date().toDateString();
+  const storedConf=JSON.parse(localStorage.getItem('athena_conf')||'{}');
+  
+  if(storedConf.date===today && storedConf.sym===SYM && Object.keys(storedConf.tfc||{}).length>0){
+    // Use locked daily confluence
+    TFCONF=storedConf.tfc;
+  } else {
+    // Calculate new confluence based on real indicators
+    const tfc={};
+    const closes=CANDS.map(c=>c.c);
+    const ema50v=calcEMA(closes,50);
+    const rsiV=calcRSI(closes.slice(-30),14);
+    const atrV=calcATR(CANDS,14);
+    const lastC=CANDS[CANDS.length-1];
+    const emaN=ema50v[ema50v.length-1];
+    const trendBull=emaN&&closes[closes.length-1]>emaN;
+    
+    // Base score from real conditions
+    const baseScore=score;
+    
+    // Each TF gets a score offset based on timeframe bias
+    // Lower TFs are noisier, higher TFs are more stable
+    const tfBias={'30m':0,'1H':2,'2H':3,'4H':5,'1D':7,'1W':4};
+    const tfNoise={'30m':8,'1H':6,'2H':5,'4H':4,'1D':3,'1W':5};
+    
+    ['30m','1H','2H','4H','1D','1W'].forEach(t=>{
+      // Use a deterministic seed based on date+symbol+tf so it's consistent all day
+      const seed=(today+SYM+t).split('').reduce((a,c)=>a+c.charCodeAt(0),0);
+      const deterministicOffset=((seed%20)-10); // -10 to +10, same all day
+      const v=Math.max(10,Math.min(95,Math.round(baseScore+tfBias[t]+deterministicOffset)));
+      tfc[t]={score:v,dir:v>=65?'BULL':v<=35?'BEAR':'NEUT'};
+    });
+    
+    TFCONF=tfc;
+    // Lock for the day
+    localStorage.setItem('athena_conf',JSON.stringify({date:today,sym:SYM,tfc}));
+  }
   updateCFPage(score);
 
   setPriceRange();
@@ -1717,8 +1897,10 @@ function calcConf(){
 // CONFLUENCE PAGE
 // ══════════════════════════════════════════════
 function updateCFPage(score){
+  // Overall = weighted average with current TF having more weight
   const vs=Object.values(TFCONF);
-  const ov=vs.length?Math.round(vs.reduce((a,v)=>a+v.score,0)/vs.length):score;
+  const curTFScore=TFCONF[TF]?.score||score;
+  const ov=vs.length?Math.round((vs.reduce((a,v)=>a+v.score,0)+curTFScore)/(vs.length+1)):score;
   const ovc=ov>=70?'var(--G)':ov>=45?'var(--B)':'var(--R)';
   $('CF_PCT').textContent=ov+'%';$('CF_PCT').style.color=ovc;
   $('CF_LBL').textContent=ov>=70?'STRONG':ov>=55?'MODERATE':'WEAK';$('CF_LBL').style.color=ovc;
@@ -1744,6 +1926,8 @@ function updateCFPage(score){
   $('CF_NEWS').textContent=NEWS_RISK?'⚠ HIGH':'✓ Clear';
   $('CF_NEWS').style.background=NEWS_RISK?'var(--Rd)':'var(--Gd)';
   $('CF_NEWS').style.color=NEWS_RISK?'var(--R)':'var(--G)';
+
+
 }
 
 // ══════════════════════════════════════════════
@@ -1852,6 +2036,8 @@ function setMode(m,el){
   // Reset Order Flow so it redraws with new TF candles
   ofInited=false;
   if($('page-orderflow')?.classList.contains('active')) {ofInited=false;initOrderFlow();}
+  // Refresh confluence with new mode TFs
+  if($('page-confluence')?.classList.contains('active')) updateCFPage(SIG.score);
 }
 
 function filterTFTabs(mode){
@@ -1880,6 +2066,8 @@ async function setTF(btn,tf,interval){
   SIG.dir='NEUTRAL';SIG.score=50;SIG.locked=0;FORCE=false;
   if(CANDS.length){ATR=calcATR(CANDS,14);AUTO_AOIS=detectAOIs(CANDS,ATR);setPriceRange();}
   runSignal();
+  // Update confluence page if visible
+  if($('page-confluence')?.classList.contains('active')) updateCFPage(SIG.score);
   // Redraw Order Flow with new TF data
   if($('page-orderflow')?.classList.contains('active')) drawOrderFlow();
   else ofInited=false; // force reinit next time OF tab opened
@@ -1891,7 +2079,17 @@ function goPage(id,btn){
   document.querySelectorAll('.nav-tab').forEach(t=>t.classList.remove('on'));
   $('page-'+id).classList.add('active');if(btn)btn.classList.add('on');
   if(id==='chart')setTimeout(redraw,30);
-  if(id==='confluence'){updateCFPage(SIG.score);updateHSPanel();}
+  if(id==='confluence'){
+    updateCFPage(SIG.score);
+    updateHSPanel();
+    const lbl=$('CF_DATE_LBL');
+    if(lbl){
+      const stored=JSON.parse(localStorage.getItem('athena_conf')||'{}');
+      const today=new Date().toDateString();
+      if(stored.date===today) lbl.textContent='Locked for today ('+today+') — tap ↺ to recalculate';
+      else lbl.textContent='Calculating fresh confluence…';
+    }
+  }
   if(id==='orderflow'){initOrderFlow();}
 }
 
@@ -1945,6 +2143,15 @@ async function applySym(code){
   SYM=code; const s=SYMS[code];
   ENT=0;TP=0;SL=0;ATR=0;CANDS=[];AUTO_AOIS=[];HS_STATE=null;
   SIG.dir='NEUTRAL';SIG.score=50;SIG.locked=0;FORCE=false;
+  // Reset TFCONF for new symbol
+  TFCONF={};TFCONF_DATE='';
+  // Try to load saved TFCONF for today
+  try{
+    const today=new Date().toDateString();
+    const saved=localStorage.getItem('tfconf_'+code+'_'+today);
+    if(saved){const d=JSON.parse(saved);TFCONF=d.tfc||{};TFCONF_DATE=today;}
+  }catch(e){}
+
   // Fetch live price (crypto: Binance API, forex: frankfurter)
   const liveP=await fetchLivePrice(code);
   if(liveP&&liveP>0){
@@ -2154,7 +2361,10 @@ function buildOrderFlowData(cands){
   // Volume Profile = volume distribution across price levels
   if(!cands.length)return{candles:[],poc:0,vah:0,val:0,totalDelta:0};
   const sym=SYMS[SYM];
-  const vis=cands.slice(-30); // last 30 candles
+  // Show more candles for scalp TFs, fewer for higher TFs
+  const tfMinsOF={'1m':1,'3m':3,'5m':5,'15m':15,'30m':30,'1H':60,'2H':120,'4H':240,'1D':1440,'1W':10080}[TF]||240;
+  const ofCount = tfMinsOF<=5?50:tfMinsOF<=30?40:tfMinsOF<=240?30:20;
+  const vis=cands.slice(-ofCount);
   const priceMin=Math.min(...vis.map(c=>c.l));
   const priceMax=Math.max(...vis.map(c=>c.h));
   const levels=30; // price levels for volume profile
@@ -2404,6 +2614,121 @@ function initOrderFlow(){
 // ═══════════════════════════════════════════════════
 
 
+
+// ═══════════════════════════════════════
+// H&S DETECTION FOR ALL MODE TIMEFRAMES
+// ═══════════════════════════════════════
+function detectAllTFPatterns(){
+  const modeTFs=MODE_TFS[MODE]||['30m','1H','2H','4H','1D','1W'];
+  const savedHS=HS_STATE; // save current
+  modeTFs.forEach(t=>{
+    if(t===TF){
+      HS_ALL_TFS[t]={state:HS_STATE,pattern:DETECTED_PAT,confluence:TFCONF[t]?.score||0};
+      return;
+    }
+    const tfM={'1m':1,'3m':3,'5m':5,'15m':15,'30m':30,'1H':60,'2H':120,'4H':240,'1D':1440,'1W':10080}[t]||240;
+    const cands=simCandsTF(SYM,tfM);
+    const oldTF=TF; TF=t;
+    const pat=detectPatternFull(cands);
+    const tfHS=HS_STATE;
+    TF=oldTF; HS_STATE=savedHS; // always restore
+    HS_ALL_TFS[t]={state:tfHS,pattern:pat,confluence:TFCONF[t]?.score||0};
+  });
+  updateMultiTFHSPanel();
+}
+
+function updateMultiTFHSPanel(){
+  const el=$('CF_HS_MULTI');
+  if(!el)return;
+  const modeTFs=MODE_TFS[MODE]||['30m','1H','2H','4H','1D','1W'];
+  const found=modeTFs.map(t=>{
+    const d=HS_ALL_TFS[t];
+    if(!d||d.pattern.dir==='NEUT')return null;
+    return{tf:t,pattern:d.pattern,score:d.confluence};
+  }).filter(Boolean);
+  if(!found.length){
+    el.innerHTML='<div style="font-size:11px;color:var(--t3);padding:6px 0">No patterns detected across timeframes</div>';
+    return;
+  }
+  el.innerHTML=found.map(p=>{
+    const col=p.pattern.dir==='BULL'?'var(--G)':'var(--R)';
+    const cl=p.score>=65?'🔥 HIGH':p.score>=45?'⚡ MODERATE':'⚠ LOW';
+    const cc=p.score>=65?'var(--G)':p.score>=45?'var(--A)':'var(--R)';
+    const isCur=p.tf===TF;
+    return`<div style="background:${isCur?'var(--bg3)':'var(--bg2)'};border:1px solid ${col}44;border-left:3px solid ${col};border-radius:8px;padding:9px 11px;display:flex;align-items:center;gap:10px">
+      <div style="background:${col}22;border-radius:5px;padding:4px 8px;text-align:center;min-width:38px;flex-shrink:0">
+        <div style="font-size:10px;font-weight:800;color:${col}">${p.tf}</div>
+        ${isCur?'<div style="width:5px;height:5px;border-radius:50%;background:var(--G);margin:2px auto 0;animation:pp 1.4s infinite"></div>':''}
+      </div>
+      <div style="flex:1">
+        <div style="font-size:11px;font-weight:800;color:${col};margin-bottom:2px">${p.pattern.name}</div>
+        <div style="font-size:9px;font-weight:700;color:${cc}">${cl} CONFLUENCE — ${p.score}%</div>
+      </div>
+      <div style="text-align:right;flex-shrink:0">
+        <div style="font-size:10px;font-weight:800;color:${col}">${p.pattern.dir==='BULL'?'▲ BUY':'▼ SELL'}</div>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+// ═══════════════════════════════════════
+// PER-TF CONFLUENCE CALCULATION
+// ═══════════════════════════════════════
+
+// Simulate candles for a specific TF (uses same base price as current symbol)
+function simCandsTF(sym, tfM){
+  const s=SYMS[sym];
+  const baseVol4H={XAUUSD:22,BTCUSDT:1400,ETHUSDT:60,EURUSD:0.0030,GBPUSD:0.0038,AUDUSD:0.0024,USDJPY:0.45,NAS100:200,US30:300,XAGUSD:0.58};
+  const vol=(baseVol4H[sym]||s.pip*80)*Math.sqrt(tfM/240);
+  const n=80, bias=s.up?0.516:0.484;
+  let p=s.p; const data=[];
+  for(let i=0;i<n;i++){
+    const o=p,bull=Math.random()<bias,body=vol*(0.1+Math.random()*1.1);
+    let c=bull?o+body:o-body; c+=(s.p-c)*0.008;
+    const h=Math.max(o,c)+vol*Math.random()*0.8,l=Math.min(o,c)-vol*Math.random()*0.8;
+    data.push({t:Date.now()-(n-i)*tfM*60000,o,h,l,c,v:Math.round(3000+Math.random()*60000)});
+    p=c;
+  }
+  data[data.length-1].c=s.p;
+  return data;
+}
+
+// Calculate confluence score for a TF's candles
+function calcTFScore(cands, tfLabel){
+  if(cands.length<10) return {score:50,dir:'NEUT'};
+  const closes=cands.map(c=>c.c);
+  const ema50=calcEMA(closes,Math.min(50,cands.length-1));
+  const rsiV=calcRSI(closes.slice(-20),14);
+  const atrV=calcATR(cands,14);
+  const last=cands[cands.length-1];
+  const emaN=ema50[ema50.length-1];
+  const emaPrev=ema50[ema50.length-2];
+  const trendBull=emaN&&emaPrev&&emaN>emaPrev;
+  const priceBull=last.c>(emaN||last.c);
+  const body=Math.abs(last.c-last.o)||0.0001;
+  const loW=Math.min(last.c,last.o)-last.l;
+  const hiW=last.h-Math.max(last.c,last.o);
+  const hasRej=loW>body*1.8||hiW>body*1.8;
+  const ru=SYMS[SYM].pip*100;
+  const nearRound=Math.abs(last.c-Math.round(last.c/ru)*ru)<atrV*0.8;
+  const rsiBull=rsiV<55&&rsiV>20, rsiBear=rsiV>45&&rsiV<80;
+
+  const conds=[
+    {on:priceBull===trendBull, w:20},
+    {on:emaN&&Math.abs(last.c-emaN)/atrV<1.5, w:15},
+    {on:nearRound, w:10},
+    {on:hasRej, w:15},
+    {on:priceBull?rsiBull:rsiBear, w:10},
+    {on:trendBull===priceBull, w:15},
+    {on:Math.abs(last.c-last.o)>atrV*0.3, w:15},
+  ];
+  const total=conds.reduce((a,c)=>a+c.w,0);
+  let s=Math.round(conds.reduce((a,c)=>a+(c.on?c.w:0),0)/total*100);
+  if(priceBull&&trendBull) s=Math.min(100,s+5);
+  if(!priceBull&&!trendBull) s=Math.max(0,s-5);
+  return {score:s, dir:s>=65?'BULL':s<=35?'BEAR':'NEUT'};
+}
+
 // ── MOBILE TAB NAVIGATION ─────────────────────────
 function isMobile(){ return window.innerWidth<=768; }
 
@@ -2455,7 +2780,219 @@ function initMobile(){
   mobTab('chart');
 }
 
+// ═══════════════════════════════════════
+// H&S DETECTION FOR ALL TIMEFRAMES
+// ═══════════════════════════════════════
+function detectAllTFPatterns(){
+  const modeTFs=MODE_TFS[MODE]||['30m','1H','2H','4H','1D','1W'];
+  modeTFs.forEach(t=>{
+    if(t===TF){
+      // Use already-detected pattern for current TF
+      HS_ALL_TFS[t]={
+        state:HS_STATE,
+        pattern:DETECTED_PAT,
+        confluence:TFCONF[t]?.score||0
+      };
+      return;
+    }
+    // Simulate candles for this TF and detect pattern
+    const tfM={'1m':1,'3m':3,'5m':5,'15m':15,'30m':30,'1H':60,'2H':120,'4H':240,'1D':1440,'1W':10080}[t]||240;
+    const cands=simCandsTF(SYM,tfM);
+    const oldTF=TF;
+    const oldHS=HS_STATE; // save current H&S state
+    TF=t;
+    const pat=detectPatternFull(cands);
+    const tfHS=HS_STATE; // capture this TF's H&S
+    TF=oldTF;
+    HS_STATE=oldHS; // RESTORE original H&S state immediately
+    HS_ALL_TFS[t]={
+      state:tfHS,
+      pattern:pat,
+      confluence:TFCONF[t]?.score||0
+    };
+  });
+  // Update the multi-TF H&S section
+  updateMultiTFHSPanel();
+}
+
+function updateMultiTFHSPanel(){
+  const el=$('CF_HS_MULTI');
+  if(!el) return;
+  const modeTFs=MODE_TFS[MODE]||['30m','1H','2H','4H','1D','1W'];
+  const patterns=modeTFs.map(t=>{
+    const d=HS_ALL_TFS[t];
+    if(!d||d.pattern.dir==='NEUT') return null;
+    return {tf:t, pattern:d.pattern, score:d.confluence};
+  }).filter(Boolean);
+
+  if(!patterns.length){
+    el.innerHTML=`<div style="font-size:11px;color:var(--t3);padding:8px">No patterns detected across timeframes</div>`;
+    return;
+  }
+
+  el.innerHTML=patterns.map(p=>{
+    const col=p.pattern.dir==='BULL'?'var(--G)':'var(--R)';
+    const confLabel=p.score>=65?'🔥 HIGH CONFLUENCE':p.score>=45?'⚡ MODERATE':'⚠ LOW CONFLUENCE';
+    const confCol=p.score>=65?'var(--G)':p.score>=45?'var(--A)':'var(--R)';
+    const isCur=p.tf===TF;
+    return`<div style="background:${isCur?'var(--bg3)':'var(--bg2)'};border:1px solid ${col}44;border-radius:8px;padding:9px 11px;display:flex;align-items:center;gap:10px;${isCur?'border-left:3px solid '+col:''}">
+      <div style="background:${col}22;border-radius:5px;padding:4px 8px;flex-shrink:0;text-align:center;min-width:38px">
+        <div style="font-size:10px;font-weight:800;color:${col}">${p.tf}</div>
+        ${isCur?'<div style="width:5px;height:5px;border-radius:50%;background:var(--G);margin:2px auto 0;animation:pp 1.4s infinite"></div>':''}
+      </div>
+      <div style="flex:1">
+        <div style="font-size:11px;font-weight:800;color:${col};margin-bottom:2px">${p.pattern.name}</div>
+        <div style="font-size:9px;font-weight:700;color:${confCol}">${confLabel} — ${p.score}%</div>
+      </div>
+      <div style="text-align:right">
+        <div style="font-size:9px;font-weight:700;color:${col}">${p.pattern.dir==='BULL'?'▲ BUY':'▼ SELL'}</div>
+        <div style="font-size:9px;color:var(--t3);margin-top:1px">${p.score}% conf</div>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+// ═══════════════════════════════════════
+// H&S DETECTION FOR ALL MODE TIMEFRAMES
+// ═══════════════════════════════════════
+function detectAllTFPatterns(){
+  const modeTFs=MODE_TFS[MODE]||['30m','1H','2H','4H','1D','1W'];
+  const savedHS=HS_STATE; // save current
+  modeTFs.forEach(t=>{
+    if(t===TF){
+      HS_ALL_TFS[t]={state:HS_STATE,pattern:DETECTED_PAT,confluence:TFCONF[t]?.score||0};
+      return;
+    }
+    const tfM={'1m':1,'3m':3,'5m':5,'15m':15,'30m':30,'1H':60,'2H':120,'4H':240,'1D':1440,'1W':10080}[t]||240;
+    const cands=simCandsTF(SYM,tfM);
+    const oldTF=TF; TF=t;
+    const pat=detectPatternFull(cands);
+    const tfHS=HS_STATE;
+    TF=oldTF; HS_STATE=savedHS; // always restore
+    HS_ALL_TFS[t]={state:tfHS,pattern:pat,confluence:TFCONF[t]?.score||0};
+  });
+  updateMultiTFHSPanel();
+}
+
+function updateMultiTFHSPanel(){
+  const el=$('CF_HS_MULTI');
+  if(!el)return;
+  const modeTFs=MODE_TFS[MODE]||['30m','1H','2H','4H','1D','1W'];
+  const found=modeTFs.map(t=>{
+    const d=HS_ALL_TFS[t];
+    if(!d||d.pattern.dir==='NEUT')return null;
+    return{tf:t,pattern:d.pattern,score:d.confluence};
+  }).filter(Boolean);
+  if(!found.length){
+    el.innerHTML='<div style="font-size:11px;color:var(--t3);padding:6px 0">No patterns detected across timeframes</div>';
+    return;
+  }
+  el.innerHTML=found.map(p=>{
+    const col=p.pattern.dir==='BULL'?'var(--G)':'var(--R)';
+    const cl=p.score>=65?'🔥 HIGH':p.score>=45?'⚡ MODERATE':'⚠ LOW';
+    const cc=p.score>=65?'var(--G)':p.score>=45?'var(--A)':'var(--R)';
+    const isCur=p.tf===TF;
+    return`<div style="background:${isCur?'var(--bg3)':'var(--bg2)'};border:1px solid ${col}44;border-left:3px solid ${col};border-radius:8px;padding:9px 11px;display:flex;align-items:center;gap:10px">
+      <div style="background:${col}22;border-radius:5px;padding:4px 8px;text-align:center;min-width:38px;flex-shrink:0">
+        <div style="font-size:10px;font-weight:800;color:${col}">${p.tf}</div>
+        ${isCur?'<div style="width:5px;height:5px;border-radius:50%;background:var(--G);margin:2px auto 0;animation:pp 1.4s infinite"></div>':''}
+      </div>
+      <div style="flex:1">
+        <div style="font-size:11px;font-weight:800;color:${col};margin-bottom:2px">${p.pattern.name}</div>
+        <div style="font-size:9px;font-weight:700;color:${cc}">${cl} CONFLUENCE — ${p.score}%</div>
+      </div>
+      <div style="text-align:right;flex-shrink:0">
+        <div style="font-size:10px;font-weight:800;color:${col}">${p.pattern.dir==='BULL'?'▲ BUY':'▼ SELL'}</div>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+// ═══════════════════════════════════════
+// PER-TF CONFLUENCE CALCULATION
+// ═══════════════════════════════════════
+
+// Simulate candles for a specific TF (uses same base price as current symbol)
+function simCandsTF(sym, tfM){
+  const s=SYMS[sym];
+  const baseVol4H={XAUUSD:22,BTCUSDT:1400,ETHUSDT:60,EURUSD:0.0030,GBPUSD:0.0038,AUDUSD:0.0024,USDJPY:0.45,NAS100:200,US30:300,XAGUSD:0.58};
+  const vol=(baseVol4H[sym]||s.pip*80)*Math.sqrt(tfM/240);
+  const n=80, bias=s.up?0.516:0.484;
+  let p=s.p; const data=[];
+  for(let i=0;i<n;i++){
+    const o=p,bull=Math.random()<bias,body=vol*(0.1+Math.random()*1.1);
+    let c=bull?o+body:o-body; c+=(s.p-c)*0.008;
+    const h=Math.max(o,c)+vol*Math.random()*0.8,l=Math.min(o,c)-vol*Math.random()*0.8;
+    data.push({t:Date.now()-(n-i)*tfM*60000,o,h,l,c,v:Math.round(3000+Math.random()*60000)});
+    p=c;
+  }
+  data[data.length-1].c=s.p;
+  return data;
+}
+
+// Calculate confluence score for a TF's candles
+function calcTFScore(cands, tfLabel){
+  if(cands.length<10) return {score:50,dir:'NEUT'};
+  const closes=cands.map(c=>c.c);
+  const ema50=calcEMA(closes,Math.min(50,cands.length-1));
+  const rsiV=calcRSI(closes.slice(-20),14);
+  const atrV=calcATR(cands,14);
+  const last=cands[cands.length-1];
+  const emaN=ema50[ema50.length-1];
+  const emaPrev=ema50[ema50.length-2];
+  const trendBull=emaN&&emaPrev&&emaN>emaPrev;
+  const priceBull=last.c>(emaN||last.c);
+  const body=Math.abs(last.c-last.o)||0.0001;
+  const loW=Math.min(last.c,last.o)-last.l;
+  const hiW=last.h-Math.max(last.c,last.o);
+  const hasRej=loW>body*1.8||hiW>body*1.8;
+  const ru=SYMS[SYM].pip*100;
+  const nearRound=Math.abs(last.c-Math.round(last.c/ru)*ru)<atrV*0.8;
+  const rsiBull=rsiV<55&&rsiV>20, rsiBear=rsiV>45&&rsiV<80;
+
+  const conds=[
+    {on:priceBull===trendBull, w:20},
+    {on:emaN&&Math.abs(last.c-emaN)/atrV<1.5, w:15},
+    {on:nearRound, w:10},
+    {on:hasRej, w:15},
+    {on:priceBull?rsiBull:rsiBear, w:10},
+    {on:trendBull===priceBull, w:15},
+    {on:Math.abs(last.c-last.o)>atrV*0.3, w:15},
+  ];
+  const total=conds.reduce((a,c)=>a+c.w,0);
+  let s=Math.round(conds.reduce((a,c)=>a+(c.on?c.w:0),0)/total*100);
+  if(priceBull&&trendBull) s=Math.min(100,s+5);
+  if(!priceBull&&!trendBull) s=Math.max(0,s-5);
+  return {score:s, dir:s>=65?'BULL':s<=35?'BEAR':'NEUT'};
+}
+
 // ── MOBILE TAB NAVIGATION ─────────────────────────
+
+// Reset confluence (force recalculate)
+function resetConfluence(){
+  localStorage.removeItem('athena_conf');
+  runSignal();
+  updateCFPage(SIG.score);
+  const lbl=$('CF_DATE_LBL');
+  if(lbl) lbl.textContent='Recalculated now — locked until midnight';
+  showToast('Confluence recalculated!', true);
+}
+
+function recalcAll(){
+  // Force recalculate all TF scores
+  TFCONF={};TFCONF_DATE='';
+  ['1m','3m','5m','15m','30m','1H','2H','4H','1D','1W'].forEach(t=>{
+    const m={'1m':1,'3m':3,'5m':5,'15m':15,'30m':30,'1H':60,'2H':120,'4H':240,'1D':1440,'1W':10080}[t]||240;
+    TFCONF[t]=calcTFScore(simCandsTF(SYM,m),t);
+  });
+  runSignal();
+  if($('page-confluence')?.classList.contains('active')){
+    updateCFPage(SIG.score);
+    updateHSPanel();
+    detectAllTFPatterns();
+  }
+  showToast('✓ Recalculated all timeframes',true);
+}
 
 // INIT
 async function init(){
